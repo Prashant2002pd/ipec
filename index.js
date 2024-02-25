@@ -101,12 +101,8 @@ app.put('/put/achievements/:id',async(req,res)=>{
 app.delete('/delete/achievements/:id',(req,res)=>{
     const id = req.params.id;
     Achievements.findOneAndDelete({team_id:id})
-    .then((date)=>{
-        if(!data){
-            res.status(404).json("No data available")
-        }else{
+    .then(()=>{
             res.status(200).json("Deleted Successfully");
-        }
         
     })
 })
