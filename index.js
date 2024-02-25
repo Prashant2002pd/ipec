@@ -7,6 +7,23 @@ const app = express();
 const PORT=3000;
 app.use(express.json());
 
+//this Middeleware is for checking that date is valid or not
+function DateMiddleware(req,res,next){
+    let date=req.body.date.split("-");
+    const currentdate=new Date();
+
+    if(Number(date[0])>currentdate.getFullYear() && Number(date[1]) > (currentdate.getMonth()+1) && Number(date[2]) > (currentdate.getDate())){
+        res.status(400).send({
+            error:"date is not valid",
+        })
+        
+    }else{
+        next();
+    }
+
+}
+
+//get  all achievements
 app.get('/get/achievements',(req,res)=>{
     Achievements.find({})
         .then((data) =>{
@@ -17,16 +34,19 @@ app.get('/get/achievements',(req,res)=>{
         })
 })
 
-app.post('/post/achievements',async(req,res) => {
+//add achievement to Achievements and Team table
+app.post('/post/achievements',DateMiddleware,async(req,res) => {
     const team_id=Math.floor(Math.random()*100000)
     const team_name= req.body.team_name;
     const img_id= req.body.image_id;
+    const event_name=req.body.event_name;
     const discription= req.body.discription;
-    const date= new Date().toISOString().slice(0,10);  //YYYY-MM-DD
+    const date= req.body.date;  //YYYY-MM-DD
    const team=await Achievements.create({
         team_id,
         team_name,
         img_id,
+        event_name,
         discription,
         date
     })
@@ -52,7 +72,7 @@ app.post('/post/achievements',async(req,res) => {
                         achievements:new mongoose.Types.ObjectId(team._id)
                     }
                 }).then(()=>{
-                    res.send('Achievement added successfully!')
+                    res.status(200).send('Achievement added successfully!')
                 }) 
                 
             })
@@ -61,13 +81,14 @@ app.post('/post/achievements',async(req,res) => {
 
 });
 
+//Update achievements(only team_name and image_id)
 app.put('/put/achievements/:id',async(req,res)=>{
     const id=req.params.id;
-    const { team_name, image_id, achievements } = req.body;
+    const { team_name, image_id} = req.body;
     try {
-        const updatedAchievement = await Achievements.findOneAndUpdate({team_id:id}, { team_name, img_id:image_id, achievements });
+        const updatedAchievement = await Achievements.findOneAndUpdate({team_id:id}, { team_name, img_id:image_id});
         const updatedTeam = await Team.findOneAndUpdate({achievements:updatedAchievement._id}, { team_name, img_id:image_id});
-        res.json({
+        res.status(200).json({
             msg:"Successfully updated the Achievements",
         });
     } catch (err) {
@@ -76,11 +97,17 @@ app.put('/put/achievements/:id',async(req,res)=>{
     
 })
 
+//Delete achievements
 app.delete('/delete/achievements/:id',(req,res)=>{
     const id = req.params.id;
     Achievements.findOneAndDelete({team_id:id})
-    .then(()=>{
-        res.json("Deleted Successfully");
+    .then((date)=>{
+        if(!data){
+            res.status(404).json("No data available")
+        }else{
+            res.status(200).json("Deleted Successfully");
+        }
+        
     })
 })
 

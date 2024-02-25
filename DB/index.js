@@ -10,7 +10,7 @@ const AchievementsSchema=new mongoose.Schema({
     img_id:String,
     event_name: String,
     discription: String,
-    Date:Date
+    date:Date
 })
 
 const TeamSchema=new mongoose.Schema({
