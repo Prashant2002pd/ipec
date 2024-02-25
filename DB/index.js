@@ -5,7 +5,7 @@ mongoose.connect('mongodb+srv://prashant2002singh:prashantdb123@cluster0.eecayhs
 // Define schemas
 const AchievementsSchema=new mongoose.Schema({
     // Schema definition here
-    team_id:Number,
+    team_id:String,
     team_name:String,
     img_id:String,
     event_name: String,

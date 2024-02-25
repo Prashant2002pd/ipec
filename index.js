@@ -17,29 +17,71 @@ app.get('/get/achievements',(req,res)=>{
         })
 })
 
-app.post('/post/achievements', (req,res) => {
-    const team_id= req.body.team_id;
+app.post('/post/achievements',async(req,res) => {
+    const team_id=Math.floor(Math.random()*100000)
     const team_name= req.body.team_name;
     const img_id= req.body.image_id;
     const discription= req.body.discription;
     const date= new Date().toISOString().slice(0,10);  //YYYY-MM-DD
-    Achievements.create({
+   const team=await Achievements.create({
         team_id,
         team_name,
         img_id,
         discription,
         date
     })
-    
-        res.status(200).json({
-            msg:"Achievement created"
-        });
 
+    await Team.findOne({team_name,img_id}).then( (data)=>{
+        if(data){
+            Team.updateOne({team_name},{
+                "$push":{
+                    achievements:new mongoose.Types.ObjectId(team._id)
+                }
+            })
+            .then(()=>{
+                res.send('Achievement added successfully!')
+            })   
+        }else{
+            Team.create({
+                team_name,
+                img_id,
+                
+            }).then(()=>{
+                Team.updateOne({team_name},{
+                    "$push":{
+                        achievements:new mongoose.Types.ObjectId(team._id)
+                    }
+                }).then(()=>{
+                    res.send('Achievement added successfully!')
+                }) 
+                
+            })
+        }   
+    });   
+
+});
+
+app.put('/put/achievements/:id',async(req,res)=>{
+    const id=req.params.id;
+    const { team_name, image_id, achievements } = req.body;
+    try {
+        const updatedAchievement = await Achievements.findOneAndUpdate({team_id:id}, { team_name, img_id:image_id, achievements });
+        const updatedTeam = await Team.findOneAndUpdate({achievements:updatedAchievement._id}, { team_name, img_id:image_id});
+        res.json({
+            msg:"Successfully updated the Achievements",
+        });
+    } catch (err) {
+        res.status(404).json({ message: 'Team not found' });
+    }
+    
 })
 
-app.put('/put/achievements/:id"',(req,res)=>{
-    const id=req.params.id;
-    
+app.delete('/delete/achievements/:id',(req,res)=>{
+    const id = req.params.id;
+    Achievements.findOneAndDelete({team_id:id})
+    .then(()=>{
+        res.json("Deleted Successfully");
+    })
 })
 
 
