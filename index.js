@@ -1,10 +1,11 @@
 const express = require('express');
+require('dotenv').config()
 const bodyParser = require('body-parser');
 const {Achievements,Team} = require("./DB");
 const { default: mongoose } = require("mongoose");
 const app = express();
 
-const PORT=3000;
+//const PORT=3000;
 app.use(express.json());
 
 //this Middeleware is for checking that date is valid or not
@@ -110,6 +111,6 @@ app.delete('/delete/achievements/:id',(req,res)=>{
 
 
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ${process.env.PORT}`);
 });

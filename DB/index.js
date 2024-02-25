@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+require('dotenv').config()
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://prashant2002singh:prashantdb123@cluster0.eecayhs.mongodb.net/');
+mongoose.connect(process.env.DB_PASS);
 
 // Define schemas
 const AchievementsSchema=new mongoose.Schema({
